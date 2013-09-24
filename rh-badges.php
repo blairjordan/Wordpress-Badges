@@ -1,11 +1,10 @@
 <?php
 /*
 Plugin Name: Rockhoist Badges
-Version: 1.2
-Plugin URI: http://www.twitter.com/blairyeah
+Version: 1.2.2
 Description: A Stack Overflow inspired plugin which allows users to acquire badges. Badges are created and managed through the standard WordPress Dashboard.
 Author: B. Jordan
-Author URI: http://www.twitter.com/blairyeah
+Author URI: http://about.me/blairjordan
 
 Copyright (c) 2009
 Released under the GPL license
@@ -28,7 +27,7 @@ http://www.gnu.org/licenses/gpl.txt
 */
 
 // Change Log
-$current_version = array('1.2');
+$current_version = array('1.2.2');
 
 // Database schema version
 global $rhb_db_version;
@@ -128,7 +127,7 @@ function rhb_count_badges() {
 
 	global $wpdb;
 	
-	$badge_count= $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . $wpdb->prefix . 'rh_badges'));
+	$badge_count= $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . $wpdb->prefix . 'rh_badges', NULL));
 	
 	return $badge_count;
 }
@@ -171,7 +170,6 @@ function rhb_get_badges( $filter = '' ) {
 }
 
 function rhb_list_badges( $filter = '' ) {
-	
 
 	if ( empty($filter ) ) { $filter = array(); }
 
@@ -258,7 +256,7 @@ function rhb_get_recent_badges() {
 	ORDER BY ub.time DESC
 	LIMIT 0, ' . $limit;
 
-	$recent_badges = $wpdb->get_results( $wpdb->prepare( $sql ) );
+	$recent_badges = $wpdb->get_results( $wpdb->prepare( $sql, NULL ) );
 
 	return $recent_badges;
 }
@@ -349,7 +347,7 @@ function rhb_get_user_comment_count( $args = '' ) {
 	$comment_count = $wpdb->get_var($wpdb->prepare( "SELECT COUNT(*) 
 		FROM " . $wpdb->prefix . "comments
 		WHERE user_id = " . $args['user_ID'] . "
-		AND comment_approved = '1'" ) );
+		AND comment_approved = '1'" , NULL) );
 
 	return $comment_count;
 }
@@ -362,7 +360,7 @@ function rhb_get_user_post_count( $args = '' ) {
 		FROM " . $wpdb->prefix . "posts
 		WHERE post_author = " . $args['user_ID'] . "
 		AND post_status = 'publish'
-		AND post_type = 'post'" ) );
+		AND post_type = 'post'" , NULL) );
 
 	return $post_count;
 }
@@ -972,5 +970,10 @@ class LatestBadgesWidget extends WP_Widget {
 
 } // class LatestBadgesWidget
 
-// register LatestBadgesWidget widget
-add_action('widgets_init', create_function('', 'return register_widget("LatestBadgesWidget");'));
+// Link to Rockhoist Badges stylesheet and apply some custom styles
+function rhb_css() {
+	echo "\n".'<link rel="stylesheet" href="'. WP_PLUGIN_URL . '/rockhoist-badges/badges.css" type="text/css" media="screen" />'."\n";
+}
+
+add_action('widgets_init', create_function('', 'return register_widget("LatestBadgesWidget");')); // register LatestBadgesWidget widget
+add_action('wp_print_styles', 'rhb_css'); // Rockhoist Badges stylesheet 
